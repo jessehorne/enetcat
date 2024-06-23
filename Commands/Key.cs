@@ -65,7 +65,7 @@ namespace Commands
                 intID = Int32.Parse(id);
             } catch
             {
-                Console.WriteLine("Invalid ID. Try `enetcat key list`");
+                Console.WriteLine("Invalid ID.");
                 return 1;
             }
 
@@ -80,6 +80,44 @@ namespace Commands
             }
 
             c.data.DefaultKey = intID;
+            c.Save();
+
+            return 0;
+        }
+
+        public static int Remove(string id)
+        {
+            int intID;
+            try
+            {
+                intID = Int32.Parse(id);
+            } catch
+            {
+                Console.WriteLine("Invalid ID.");
+                return 1;
+            }
+
+            // load config
+            Conf c = new Conf();
+
+            // validate id
+            if (intID < 0 || intID > c.data.Keys.Count-1)
+            {
+                Console.WriteLine("There is no key with that ID. Try `enetcat key list`");
+                return 1;
+            }
+
+            if (c.data.DefaultKey > intID)
+            {
+                // if the default key is larger than the intID being deleted, it should be updated to current-1
+                c.data.DefaultKey--;
+            } else if (c.data.DefaultKey == intID)
+            {
+                // if the default key is being deleted, we should set it back to -1 which means no default key is set
+                c.data.DefaultKey = -1;
+            }
+
+            c.data.Keys.RemoveAt(intID);
             c.Save();
 
             return 0;

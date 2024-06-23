@@ -49,6 +49,12 @@ namespace ENetcat
                         {
                             return Commands.CommandKey.Use(args[2]);
                         }
+                    } else if (args[1] == "remove")
+                    {
+                        if (args.Length == 3)
+                        {
+                            return Commands.CommandKey.Remove(args[2]);
+                        }
                     }
 
                     return Commands.CommandHelp.Run();
