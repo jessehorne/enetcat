@@ -23,24 +23,50 @@ namespace Util
 
             return true;
         }
+
+        public static IPAddress Parse(string host)
+        {
+            IPAddress? ip;
+            if (IPAddress.TryParse(host, out ip))
+            {
+                switch (ip.AddressFamily)
+                {
+                    case System.Net.Sockets.AddressFamily.InterNetwork:
+                    case System.Net.Sockets.AddressFamily.InterNetworkV6:
+                        break;
+                    default:
+                        return IPAddress.Loopback;
+                }
+            }
+
+            return ip == null ? IPAddress.Loopback : ip;
+        }
     }
 
     class Port
     {
         public static bool IsValid(string port)
         {
-            int intPort;
-            bool isPortANumber = int.TryParse(port, out intPort);
-
-            if (!isPortANumber) {
-                return false;
-            }
+            int intPort = Parse(port);
 
             if (intPort <= 0) {
                 return false;
             }
 
             return true;
+        }
+
+        public static int Parse(string port)
+        {
+            int intPort;
+            bool isPortANumber = int.TryParse(port, out intPort);
+
+            if (!isPortANumber)
+            {
+                return 0;
+            }
+
+            return intPort;
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using ENetcat;
 
 namespace Commands
@@ -34,7 +35,16 @@ namespace Commands
                 return 1;
             }
 
-            return 0;
+            // Start server
+            int intPort = Util.Port.Parse(port);
+            TcpListener l = new TcpListener(Util.IP.Parse(host), intPort);
+            l.Start();
+
+            TcpClient client = l.AcceptTcpClient();
+            NetworkStream stream = client.GetStream();
+
+            TCPEchoHandler tcp = new TCPEchoHandler(stream);
+            return tcp.Serve();
         }
     }
 }

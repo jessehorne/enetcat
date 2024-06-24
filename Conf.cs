@@ -31,6 +31,31 @@ namespace ENetcat
             this.Load(); // will attempt to load an existing conf.json or fill defaults and save if not
         }
         
+        public string GetDefaultPublicKeyCSPBlob()
+        {
+            return Convert.ToBase64String(this.GetDefaultKey().ExportCspBlob(false));
+        }
+
+        public byte[] DecryptWithDefaultKey(byte[] data)
+        {
+            return this.GetDefaultKey().Decrypt(data, false);
+        }
+
+        public RSACryptoServiceProvider GetDefaultKey()
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+
+            if (this.data.DefaultKey == -1)
+            {
+                return rsa;
+            }
+
+            byte[] csp = Convert.FromBase64String(this.data.Keys[this.data.DefaultKey].KeyCSP);
+            rsa.ImportCspBlob(csp);
+
+            return rsa;
+        }
+
         public void AddKey(string host, RSACryptoServiceProvider rsa, bool useAsDefault)
         {
             Key newKey = new Key();
