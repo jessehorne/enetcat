@@ -89,6 +89,7 @@ namespace ENetcat
         {
             // load IV and generate a aes key
             this.aes.IV = iv;
+            this.aes.Mode = CipherMode.CBC;
             this.aes.GenerateKey();
 
             byte[] encrypted = clientKey.Encrypt(this.aes.Key, false);
@@ -107,7 +108,6 @@ namespace ENetcat
         {
             // Handshake: Part 1
             this.SendRSAPublicKeyToClient();
-            Console.WriteLine("SENDING SERVER PUB KEY TO CLIENT");
 
             // Handshake: Part 2
             RSACryptoServiceProvider? rsa = this.ReceiveClientRSAPublicKey();
@@ -116,7 +116,6 @@ namespace ENetcat
                 Console.WriteLine("Invalid client public key.");
                 return 1;
             }
-            Console.WriteLine("GOT CLIENT PUB KEY");
 
             // Handshake: Part 3
             byte[] iv = this.ReceiveClientIVChallenge();
@@ -126,14 +125,9 @@ namespace ENetcat
                 Console.WriteLine("Invalid IV. Not 16-byte.");
                 return 1;
             }
-            Console.WriteLine("RECEIVED IV CHALLENGE");
 
             // Handshake: Part 4
             this.SendAESKeyAndIVBackToClient(iv, rsa);
-
-            Console.WriteLine("Sent IV!");
-
-            Console.WriteLine("Starting loop");
 
             ICryptoTransform encryptor = aes.CreateEncryptor(this.aes.Key, this.aes.IV);
             ICryptoTransform decryptor = aes.CreateDecryptor(this.aes.Key, this.aes.IV);
@@ -152,6 +146,8 @@ namespace ENetcat
 
                     // send it back
                     byte[] encrypted = encryptor.TransformFinalBlock(decrypted, 0, decrypted.Length);
+
+                    this.writer.WriteLine(line);
                 }
                 
                 break;
